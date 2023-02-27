@@ -20,6 +20,5 @@ const int heightOfMap = 4;
 int main()
 {
     cout << "Hello World!\n";
-    cout << "dfsdsfdfsdfdsfdsdfsdf";
-}
+    cout << "f";
 

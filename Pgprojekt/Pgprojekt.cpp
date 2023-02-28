@@ -10,7 +10,7 @@ using namespace std;
 
 const char blackSquare = char(219);
 const char whiteSquare = ' ';
-const int A[5][5] = {
+const bool A[5][5] = {
     {1,1,0,1,1},
     {1,0,0,1,1},
     {0,0,1,0,0},

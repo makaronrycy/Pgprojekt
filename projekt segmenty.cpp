@@ -61,8 +61,29 @@ const bool F[5][5] = {
     E = 4
     F = 5
 */
-void drawBoard() {
+void drawBoard(int segment_id) {
     cout << setw(0);
+    bool board[5][5];
+    switch(segment_id){
+        case 0:
+            board = A;
+            break;
+        case 1:
+            board = B;
+            break;
+        case 2:
+            board = C;
+            break;
+        case 3:
+            board = D;
+            break;
+        case 4:
+            board = E;
+            break;
+        case 5:
+            board = F;
+            break;
+    }
     for (int i = 0; i < 5; i++)
     {
         for (int j = 0; j < 5; j++)
@@ -104,5 +125,5 @@ void drawBoard() {
 int main()
 {
     //int map[5][5];
-    drawBoard();
+    drawBoard(0);
 }

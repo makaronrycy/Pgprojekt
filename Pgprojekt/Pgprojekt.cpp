@@ -66,9 +66,9 @@ void fillTable(bool map[][20], const bool segment[][5], int segment_number, int 
 void drawBoard(bool map[][20], int robot_x = NULL, int robot_y = NULL) {
     cout << setw(0);
    
-    for (int i = 0; i < 40; i++)
+    for (int i = 0; i < 20; i++)
     {
-        for (int j = 0; j < 20; j++)
+        for (int j = 0; j < 40; j++)
         {
             if (robot_x == i  && robot_y == j) {
                 cout << robot;
@@ -157,6 +157,6 @@ int main()
     bool isVisited = new bool *[number_of_vertices];
     bool visits[40][20] = { 0 };
     scout(map,visits,0,2);
-    //drawBoard(map);
+    drawBoard(map);
     
 }

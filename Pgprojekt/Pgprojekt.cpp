@@ -98,7 +98,7 @@ void drawBoard(bool map[][20], int robot_x = -1, int robot_y = -1) {
 void buildTable(bool map[][20],int& nr_of_vertices) {
     for (int i = 0; i < 32; i++)
     {
-        int choice = rand() % 6;
+        int choice = rand() % 1;
         switch (choice)
         {
         case 0:
@@ -189,9 +189,10 @@ void initializeGraph(Graph &graph, int number_of_vertices) {
 }
 int main()
 {
+    srand(time(NULL));
     int lookup_id[40][20] = {};
     Graph graph;
-    int number_of_vertices,id = 0;
+    int number_of_vertices = 0,id = 0;
     bool visits[40][20] = { 0 };
     bool map[height_of_map][width_of_map];
     srand(time(NULL));
@@ -219,7 +220,7 @@ int main()
             p = p->next;
         }
         cout << endl;
-    }
-    drawBoard(map);*/
+    }*/
+    drawBoard(map);
     
 }

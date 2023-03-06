@@ -12,6 +12,14 @@ const char black_square = char(219);
 const char white_square = ' ';
 const char robot = char(234);
 
+struct Node {
+    int coords[2];
+    struct Node* next;
+};
+struct Graph {
+    int num_of_vertices;
+    struct Node** list;
+};
 const bool A[5][5] = {
     {1,1,0,1,1},
     {1,0,0,1,1},
@@ -63,7 +71,7 @@ const bool F[5][5] = {
     F = 5
 */
 void fillTable(bool map[][20], const bool segment[][5], int segment_number, int &nr_of_vertices);
-void drawBoard(bool map[][20], int robot_x = NULL, int robot_y = NULL) {
+void drawBoard(bool map[][20], int robot_x = -1, int robot_y = -1) {
     cout << setw(0);
    
     for (int i = 0; i < 40; i++)
@@ -128,35 +136,90 @@ void fillTable(bool map[][20],const bool segment[][5], int segment_number, int &
         }
     }
 }
+Node *createNode(int x, int y) {
+    Node* node = new Node;
+    node->coords[0] = x;
+    node->coords[1] = y;
+    node->next = NULL;
+    return node;
+}
+void addEdge(Graph &graph,int trg_x,int trg_y,int src_id) {
+    src_id--;
+    Node *node = createNode(trg_x, trg_y);
+    node->next = graph.list[src_id];
+    graph.list[src_id] = node;
+}
+void scout(bool map[][20], bool isVisited[][20], int scout_row, int scout_column, int& id, Graph& graph, int lookup_id[][20]) {
 
-void scout(bool map[][20],bool isVisited[][20],int scout_row ,int scout_column) {
-        isVisited[scout_row][scout_column] = 1;
-        if (!map[scout_row-1][scout_column] && scout_row > 0 && !isVisited[scout_row-1][scout_column])
-        {
-            scout(map,isVisited, scout_row - 1, scout_column);
-        }
-        if (!map[scout_row + 1][scout_column] && scout_row < 39 && !isVisited[scout_row + 1][scout_column])
-        {
-            scout(map, isVisited,scout_row + 1, scout_column);
-        }
-        if (!map[scout_row][scout_column - 1] && scout_column > 0 && !isVisited[scout_row][scout_column - 1])
-        {
-            scout(map,isVisited, scout_row, scout_column - 1);
-        }
-        if (!map[scout_row][scout_column + 1] && scout_column < 19 && !isVisited[scout_row][scout_column +1])
-        {
-            scout(map,isVisited,scout_row, scout_column+1);
-        }
+    if (isVisited[scout_row][scout_column]) return;
+    id++;
+    lookup_id[scout_row][scout_column] = id;
+    isVisited[scout_row][scout_column] = 1;
+    /*system("cls");
+    drawBoard(isVisited, scout_row, scout_column);*/
+    if (!map[scout_row - 1][scout_column] && scout_row > 0)
+    {
+        scout(map, isVisited, scout_row - 1, scout_column, id, graph, lookup_id);
+        addEdge(graph, scout_row - 1, scout_column, lookup_id[scout_row][scout_column]);
+    }
+    if (!map[scout_row + 1][scout_column] && scout_row < 39)
+    {
+        scout(map, isVisited, scout_row + 1, scout_column, id, graph, lookup_id);
+        addEdge(graph, scout_row + 1, scout_column, lookup_id[scout_row][scout_column]);
+    }
+    if (!map[scout_row][scout_column - 1] && scout_column > 0)
+    {
+        scout(map, isVisited, scout_row, scout_column - 1, id, graph, lookup_id);
+        addEdge(graph, scout_row, scout_column - 1, lookup_id[scout_row][scout_column]);
+    }
+    if (!map[scout_row][scout_column + 1] && scout_column < 19)
+    {
+        scout(map, isVisited, scout_row, scout_column + 1, id, graph, lookup_id);
+        addEdge(graph, scout_row, scout_column + 1, lookup_id[scout_row][scout_column]);
+    }
+}
+//inicjalizuje graf, definiuje ilość wierzchołków i przypisuje w tablicy sąsiedztwa NULL
+void initializeGraph(Graph &graph, int number_of_vertices) {
+    graph.num_of_vertices = number_of_vertices;
+    graph.list = new Node *[number_of_vertices];
+    for (int i = 0; i < number_of_vertices; i++)
+    {
+        graph.list[i] = NULL;
+    }
 }
 int main()
 {
-    int number_of_vertices = 0;
-    srand(time(NULL));
-    bool map[height_of_map][width_of_map];
-    buildTable(map,number_of_vertices);
-    bool isVisited = new bool *[number_of_vertices];
+    int lookup_id[40][20] = {};
+    Graph graph;
+    int number_of_vertices,id = 0;
     bool visits[40][20] = { 0 };
-    scout(map,visits,0,2);
-    //drawBoard(map);
+    bool map[height_of_map][width_of_map];
+    srand(time(NULL));
+    buildTable(map,number_of_vertices);
+    initializeGraph(graph, number_of_vertices);
+    bool isVisited = new bool *[number_of_vertices];
+    scout(map,visits,0,2,id,graph,lookup_id);
+
+    //DEBUG
+    /*cout << number_of_vertices << endl;
+    for (int i = 0; i < 40; i++)
+    {
+        for (int j = 0; j < 20; j++)
+        {
+            cout<<setw(4)<<lookup_id[i][j];
+        }
+        cout << endl;
+    }
+    for (int i = 0; i < number_of_vertices; i++)
+    {
+        Node* p = graph.list[i];
+        cout << "Vector " << i << ": ";
+        while (p != NULL) {
+            cout<< lookup_id[p->coords[0]][p->coords[1]]-1<<" ->";
+            p = p->next;
+        }
+        cout << endl;
+    }
+    drawBoard(map);*/
     
 }

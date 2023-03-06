@@ -98,7 +98,7 @@ void drawBoard(bool map[][20], int robot_x = -1, int robot_y = -1) {
 void buildTable(bool map[][20],int& nr_of_vertices) {
     for (int i = 0; i < 32; i++)
     {
-        int choice = rand() % 1;
+        int choice = rand() % 6;
         switch (choice)
         {
         case 0:

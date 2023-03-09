@@ -13,6 +13,7 @@ const char white_square = ' ';
 const char robot = char(234);
 
 struct Node {
+    int id;
     int coords[2];
     struct Node* next;
 };
@@ -73,7 +74,6 @@ const bool F[5][5] = {
 void fillTable(bool map[][20], const bool segment[][5], int segment_number, int &nr_of_vertices);
 void drawBoard(bool map[][20], int robot_x = -1, int robot_y = -1) {
     cout << setw(0);
-   
     for (int i = 0; i < 40; i++)
     {
         for (int j = 0; j < 20; j++)
@@ -126,83 +126,107 @@ void buildTable(bool map[][20],int& nr_of_vertices) {
 }
 void fillTable(bool map[][20],const bool segment[][5], int segment_number, int &nr_of_vertices) {
     int row = (segment_number / 4)*5;
-    int column = (segment_number % 4)*5;
+    int col = (segment_number % 4)*5;
     for (int i = 0; i < 5; i++)
     {
         for (int j = 0; j < 5; j++)
         {
             if (!segment[i][j]) nr_of_vertices++;
-            map[i + row][j + column] = segment[i][j];
+            map[i + row][j + col] = segment[i][j];
         }
     }
 }
-Node *createNode(int x, int y) {
+Node *createNode(int x, int y, int id) {
     Node* node = new Node;
     node->coords[0] = x;
     node->coords[1] = y;
+    node->id = id;
     node->next = NULL;
     return node;
 }
-void addEdge(Graph &graph,int trg_x,int trg_y,int src_id) {
+void addEdge(Graph &graph,int trg_x,int trg_y,int src_id, int trg_id) {
     src_id--;
-    Node *node = createNode(trg_x, trg_y);
+    trg_id--;
+    Node *node = createNode(trg_x, trg_y,trg_id);
     node->next = graph.list[src_id];
     graph.list[src_id] = node;
 }
-void scout(bool map[][20], bool isVisited[][20], int scout_row, int scout_column, int& id, Graph& graph, int lookup_id[][20]) {
+void scout(bool map[][20], int scout_row, int scout_col, int& id, Graph& graph, int lookup_id[][20]) {
 
-    if (isVisited[scout_row][scout_column]) return;
+    if (lookup_id[scout_row][scout_col] != 0) return;
+    int dir[4][2] = { {1,0},{-1,0},{0,1},{0,-1} };
     id++;
-    lookup_id[scout_row][scout_column] = id;
-    isVisited[scout_row][scout_column] = 1;
-    /*system("cls");
-    drawBoard(isVisited, scout_row, scout_column);*/
-    if (!map[scout_row - 1][scout_column] && scout_row > 0)
+    lookup_id[scout_row][scout_col] = id;
+    for (int i = 0; i < 4; i++)
     {
-        scout(map, isVisited, scout_row - 1, scout_column, id, graph, lookup_id);
-        addEdge(graph, scout_row - 1, scout_column, lookup_id[scout_row][scout_column]);
-    }
-    if (!map[scout_row + 1][scout_column] && scout_row < 39)
-    {
-        scout(map, isVisited, scout_row + 1, scout_column, id, graph, lookup_id);
-        addEdge(graph, scout_row + 1, scout_column, lookup_id[scout_row][scout_column]);
-    }
-    if (!map[scout_row][scout_column - 1] && scout_column > 0)
-    {
-        scout(map, isVisited, scout_row, scout_column - 1, id, graph, lookup_id);
-        addEdge(graph, scout_row, scout_column - 1, lookup_id[scout_row][scout_column]);
-    }
-    if (!map[scout_row][scout_column + 1] && scout_column < 19)
-    {
-        scout(map, isVisited, scout_row, scout_column + 1, id, graph, lookup_id);
-        addEdge(graph, scout_row, scout_column + 1, lookup_id[scout_row][scout_column]);
+        int new_row = scout_row + dir[i][0];
+        int new_col = scout_col + dir[i][1];
+        if (!map[new_row][new_col] && new_row >= 0 && new_row < 40 && new_col >= 0 && new_col <20){
+            scout(map, new_row, new_col, id, graph, lookup_id);
+            addEdge(graph, new_row, new_col, lookup_id[scout_row][scout_col], lookup_id[new_row][new_col]);
+        }
     }
 }
 //inicjalizuje graf, definiuje ilość wierzchołków i przypisuje w tablicy sąsiedztwa NULL
-void initializeGraph(Graph &graph, int number_of_vertices) {
+void constructGraph(Graph &graph, int number_of_vertices) {
     graph.num_of_vertices = number_of_vertices;
     graph.list = new Node *[number_of_vertices];
-    for (int i = 0; i < number_of_vertices; i++)
-    {
-        graph.list[i] = NULL;
+    for (int i = 0; i < number_of_vertices; i++) graph.list[i] = nullptr;
+}
+bool DFS(Graph graph,int path[] ,bool visited[], bool map[][20],int &path_index, int A, int B){
+    Node* node = graph.list[A];
+    path[path_index] = A;
+    path_index++;
+    visited[A] = true;
+    if (A == B) {
+        return true;
     }
+    visited[A] = true;
+    while (node != nullptr) {
+        A = node->id;
+        
+        if (!visited[A]) {
+            
+            if (DFS(graph, path, visited, map, path_index, A, B)) {
+                return true;
+            }
+        }
+        node = node->next;
+    }
+    path[path_index] = NULL;
+    path_index--;
+    return false;
 }
 int main()
 {
     srand(time(NULL));
-    int lookup_id[40][20] = {};
+    
     Graph graph;
-    int number_of_vertices = 0,id = 0;
-    bool visits[40][20] = { 0 };
+    int lookup_id[40][20] = {};
+    int number_of_vertices = 0, id = 0, path_index=0;
     bool map[height_of_map][width_of_map];
-    srand(time(NULL));
+    
+
     buildTable(map,number_of_vertices);
-    initializeGraph(graph, number_of_vertices);
-    bool isVisited = new bool *[number_of_vertices];
-    scout(map,visits,0,2,id,graph,lookup_id);
+    constructGraph(graph, number_of_vertices);
+    scout(map,0,2,id,graph,lookup_id);
+    
+    //Wybieranie randomowych punktów, startowy i końcowy
+    int A = rand() % number_of_vertices;
+    int B = rand() % number_of_vertices;
+    //Tablica punktów odwiedzonych i drogi;
+    bool* visited = new bool[number_of_vertices]();
+    int* path = new int[number_of_vertices]();
+    cout << "A: " << A << " B: " << B << endl;
+    DFS(graph,path, visited, map,path_index,A, B);
+    //Drukowanie drogi
+    for (int i = 0; i < path_index; i++)
+    {
+        cout << path[i]<<"->";
+    }
 
     //DEBUG
-    /*cout << number_of_vertices << endl;
+    /*cout <<endl<< number_of_vertices << endl;
     for (int i = 0; i < 40; i++)
     {
         for (int j = 0; j < 20; j++)
@@ -216,11 +240,13 @@ int main()
         Node* p = graph.list[i];
         cout << "Vector " << i << ": ";
         while (p != NULL) {
-            cout<< lookup_id[p->coords[0]][p->coords[1]]-1<<" ->";
+            cout<< p->id<<" ->";
             p = p->next;
         }
         cout << endl;
+    }
+    for (int i = 0; i < number_of_vertices; i++)
+    {
+        cout << path[i] << "->";
     }*/
-    drawBoard(map);
-    
 }

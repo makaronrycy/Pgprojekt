@@ -173,9 +173,12 @@ void constructGraph(Graph &graph, int number_of_vertices) {
     graph.list = new Node *[number_of_vertices];
     for (int i = 0; i < number_of_vertices; i++) graph.list[i] = nullptr;
 }
-bool DFS(Graph graph,int path[] ,bool visited[], bool map[][20],int &path_index, int A, int B){
+bool DFS(Graph graph,int **path ,bool visited[], bool map[][20],int &path_index, int A, int B){
     Node* node = graph.list[A];
-    path[path_index] = A;
+    path[path_index][0] = A;
+    path[path_index][1] = node->coords[0];
+    path[path_index][2] = node->coords[1];
+
     path_index++;
     visited[A] = true;
     if (A == B) {
@@ -193,7 +196,9 @@ bool DFS(Graph graph,int path[] ,bool visited[], bool map[][20],int &path_index,
         }
         node = node->next;
     }
-    path[path_index] = NULL;
+    path[path_index][0] = NULL;
+    path[path_index][1] = NULL;
+    path[path_index][2] = NULL;
     path_index--;
     return false;
 }
@@ -206,27 +211,37 @@ int main()
     int number_of_vertices = 0, id = 0, path_index=0;
     bool map[height_of_map][width_of_map];
     
-
     buildTable(map,number_of_vertices);
     constructGraph(graph, number_of_vertices);
     scout(map,0,2,id,graph,lookup_id);
     
     //Wybieranie randomowych punktów, startowy i końcowy
-    int A = rand() % number_of_vertices;
-    int B = rand() % number_of_vertices;
+    int A = 5;//rand() % number_of_vertices;
+    int B = 10;// rand() % number_of_vertices;
+
     //Tablica punktów odwiedzonych i drogi;
     bool* visited = new bool[number_of_vertices]();
-    int* path = new int[number_of_vertices]();
-    cout << "A: " << A << " B: " << B << endl;
+    int** path = new int*[number_of_vertices];
+    for (int i = 0; i < number_of_vertices; i++)
+    {
+        path[i] = new int[3]{};
+    }
+    
     DFS(graph,path, visited, map,path_index,A, B);
     //Drukowanie drogi
     for (int i = 0; i < path_index; i++)
     {
-        cout << path[i]<<"->";
+        system("cls");
+        drawBoard(map, path[i][1], path[i][2]);
     }
-
+    cout << "A: " << A << " B: " << B << endl;
+    for (int i = 0; i < path_index; i++)
+    {
+        cout << path[i][0]<<"->";
+    }
+   
     //DEBUG
-    /*cout <<endl<< number_of_vertices << endl;
+    cout <<endl<< number_of_vertices << endl;
     for (int i = 0; i < 40; i++)
     {
         for (int j = 0; j < 20; j++)
@@ -235,7 +250,7 @@ int main()
         }
         cout << endl;
     }
-    for (int i = 0; i < number_of_vertices; i++)
+    /*for (int i = 0; i < number_of_vertices; i++)
     {
         Node* p = graph.list[i];
         cout << "Vector " << i << ": ";

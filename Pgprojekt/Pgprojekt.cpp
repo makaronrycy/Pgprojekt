@@ -216,8 +216,8 @@ int main()
     scout(map,0,2,id,graph,lookup_id);
     
     //Wybieranie randomowych punktów, startowy i końcowy
-    int A = 5;//rand() % number_of_vertices;
-    int B = 10;// rand() % number_of_vertices;
+    int A = rand() % number_of_vertices;
+    int B = rand() % number_of_vertices;
 
     //Tablica punktów odwiedzonych i drogi;
     bool* visited = new bool[number_of_vertices]();
@@ -242,6 +242,8 @@ int main()
    
     //DEBUG
     cout <<endl<< number_of_vertices << endl;
+
+    //UWAGA ID WIERZCHOŁKÓW W DRUKOWANEJ TABELECE SĄ WIĘKSZE O 1 OD WARTOŚCI W WIERZCHOŁKACH
     for (int i = 0; i < 40; i++)
     {
         for (int j = 0; j < 20; j++)
